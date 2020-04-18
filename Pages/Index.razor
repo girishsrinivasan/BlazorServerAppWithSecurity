@@ -1,0 +1,71 @@
+﻿@page "/"
+@attribute [Authorize]
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity;
+@using BlazorServerAppWithSecurity
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<h3>ClaimsPrincipal Data</h3>
+
+
+<p>@_authMessage</p>
+
+@if (_claims.Count() > 0)
+{
+    <ul>
+        @foreach (var claim in _claims)
+        {
+            <li>@claim.Type &ndash; @claim.Value</li>
+        }
+    </ul>
+}
+
+<p>@_surnameMessage</p>
+
+<p>Custom Property from application user: @_customProperty</p>
+
+@code {
+    private string _authMessage;
+    private string _surnameMessage;
+    private string _customProperty = "null";
+    private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+
+    private async Task GetClaimsPrincipalData()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            _authMessage = $"{user.Identity.Name} is authenticated.";
+            _claims = user.Claims;
+            _surnameMessage =
+                $"Surname: {user.FindFirst(c => c.Type == ClaimTypes.Surname)?.Value}";
+        }
+        else
+        {
+            _authMessage = "The user is NOT authenticated.";
+        }
+
+
+        //Kind of useless, but we can get the application user like this
+        var applicationUser = await UserManager.FindByNameAsync(user.Identity.Name);
+
+        if (applicationUser != null)
+        {
+            _customProperty = applicationUser.CustomProperty;
+        }
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetClaimsPrincipalData();
+
+    }
+}
+
