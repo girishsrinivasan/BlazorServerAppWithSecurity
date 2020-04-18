@@ -1,4 +1,4 @@
-# Blazor server app with authentication, but without using EntityFramework
+# Blazor server app with authentication, but without using Entity Framework
 
 ### This is based off the Visual studio generated app, but with the following changes
 
