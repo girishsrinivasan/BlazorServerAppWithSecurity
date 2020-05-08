@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BlazorServerAppWithSecurity.Areas.Identity;
 using BlazorServerAppWithSecurity.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BlazorServerAppWithSecurity
 {
@@ -38,6 +39,13 @@ namespace BlazorServerAppWithSecurity
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
             services.AddSingleton<WeatherForecastService>();
             services.AddScoped<AssertPermission>();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("UserNameStartWithAnA", policy =>
+                    policy.Requirements.Add(new UserNameStartWithAnARequirement()));
+            });
+
+            services.AddSingleton<IAuthorizationHandler, UserNameStartWithAnAHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
